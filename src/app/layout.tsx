@@ -10,6 +10,7 @@ import styled from '@emotion/styled';
 
 import config from '@/config';
 import { colors } from '@/shared/colors';
+import ContactsProvider from '@/context/ContactProvider';
 
 const poppins = Poppins({ weight: '400', subsets: ['latin'] });
 
@@ -23,18 +24,29 @@ const client = new ApolloClient({
   cache: new InMemoryCache(),
 });
 
-const HeadingText = styled.p({
-  fontWeight: 'bold',
-  fontSize: '1.5rem',
+const Heading = styled.div({
   display: 'flex',
+  width: '100vw',
   alignItems: 'center',
   justifyContent: 'center',
   padding: 16,
-  margin: 0,
+  borderBottom: '1px solid lightgrey',
+  backgroundColor: 'white',
+  position: 'fixed',
+  top: 0,
+  left: 0,
+  right: 0,
+  zIndex: 10,
+});
+
+const HeadingText = styled.p({
+  fontWeight: 'bold',
+  fontSize: '1.5rem',
   color: colors.primary_green,
 });
 
 const Container = styled.div({
+  marginTop: 70,
   padding: 16,
 });
 
@@ -47,8 +59,12 @@ export default function RootLayout({
     <html lang="en">
       <body className={poppins.className}>
         <ApolloProvider client={client}>
-          <HeadingText>Phonebook</HeadingText>
-          <Container>{children}</Container>
+          <ContactsProvider>
+            <Heading>
+              <HeadingText>Phonebook</HeadingText>
+            </Heading>
+            <Container>{children}</Container>
+          </ContactsProvider>
         </ApolloProvider>
       </body>
     </html>
