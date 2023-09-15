@@ -47,7 +47,6 @@ const HeadingText = styled.p({
 
 const Container = styled.div({
   marginTop: 70,
-  padding: 16,
 });
 
 export default function RootLayout({

@@ -1,10 +1,13 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from '@emotion/styled';
 import Contact from '@/components/Contact';
 import ContactLoading from '@/components/ContactLoading';
 import { useContacts } from '@/context/ContactProvider';
+import { useQuery } from '@apollo/client';
+import { ContactResult, GET_CONTACT } from '@/services/contacts';
+import { IContact } from '@/shared/interface';
 
 const Section = styled.div({
   fontSize: 24,
@@ -23,28 +26,39 @@ const Empty = styled.div({
 });
 
 const ContactListPage: React.FC = () => {
-  const { loading, regularContacts, favoriteContacts } = useContacts();
+  const { favoriteContacts } = useContacts();
+  const { loading, error, data } = useQuery<ContactResult>(GET_CONTACT);
+
+  const [favorites, setFavorites] = useState<IContact[]>([]);
+
+  useEffect(() => {
+    const favoriteContact = data?.contact.filter((contact) =>
+      favoriteContacts.includes(contact.id)
+    );
+    if ((favoriteContact?.length as number) > 0 && favoriteContact)
+      setFavorites([...favoriteContact]);
+  }, [favoriteContacts, data]);
 
   return (
     <>
       <Section>Favorites</Section>
       {loading && <ContactLoading />}
-      {!loading && favoriteContacts.length === 0 ? (
+      {!loading && favorites.length === 0 ? (
         <Empty>No favorite contact(s) added yet</Empty>
       ) : (
         <>
-          {favoriteContacts.map((contact) => (
+          {favorites.map((contact) => (
             <Contact key={contact.id} contact={contact} />
           ))}
         </>
       )}
       <Section>Contacts</Section>
       {loading && <ContactLoading />}
-      {regularContacts &&
+      {data &&
         !loading &&
-        regularContacts.map((contact) => (
-          <Contact key={contact.id} contact={contact} />
-        ))}
+        data.contact
+          .filter((c) => !favoriteContacts.includes(c.id))
+          .map((contact) => <Contact key={contact.id} contact={contact} />)}
     </>
   );
 };
