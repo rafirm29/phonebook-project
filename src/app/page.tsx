@@ -82,7 +82,7 @@ const AddContact = styled.button({
 });
 
 const ContactListPage: React.FC = () => {
-  const { favoriteContacts } = useContacts();
+  const { favoriteContacts, setAllContacts } = useContacts();
   const { loading, error, data, refetch } =
     useQuery<ContactResult>(GET_CONTACT);
 
@@ -160,6 +160,10 @@ const ContactListPage: React.FC = () => {
   }, [searchQuery]);
 
   useEffect(() => {
+    // Update all contacts context
+    setAllContacts(data?.contact || []);
+
+    // Update favorite contacts
     const favoriteContact = data?.contact.filter((contact) =>
       favoriteContacts.includes(contact.id)
     );

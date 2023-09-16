@@ -16,6 +16,7 @@ import {
   MUTATE_ADD_CONTACT,
   MUTATE_EDIT_CONTACT_BY_ID,
 } from '@/services/contacts';
+import { useContacts } from '@/context/ContactProvider';
 
 const ContactHeader = styled.div({
   display: 'flex',
@@ -75,7 +76,7 @@ const PhoneContainer = styled.div({
 });
 
 const AddPhone = styled.div({
-  curson: 'pointer',
+  cursor: 'pointer',
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
@@ -93,6 +94,7 @@ const ActionContainer = styled.div({
 });
 
 const ActionButton = styled.button({
+  cursor: 'pointer',
   padding: 16,
   display: 'flex',
   justifyContent: 'center',
@@ -111,6 +113,7 @@ const ContactPage: React.FC = () => {
   const searchParams = useSearchParams();
   const user_id = searchParams.get('user_id');
   const router = useRouter();
+  const { isNameAlreadyExist } = useContacts();
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -136,7 +139,18 @@ const ContactPage: React.FC = () => {
   // Add contact mutation
   const [addContactMutation, addContactData] = useMutation(MUTATE_ADD_CONTACT);
   if (addContactData.loading) console.log('Adding'); // TODO: Implement loading
-  if (addContactData.error) console.error(addContactData.error);
+  if (addContactData.error) {
+    console.error(addContactData.error.message);
+    if (addContactData.error.message.includes('phone_number_key')) {
+      toast.error('Phone number already exists! Please enter another number', {
+        position: 'top-right',
+      });
+    } else {
+      toast.error('Something went wrong. Please try again later.', {
+        position: 'top-right',
+      });
+    }
+  }
   if (addContactData.data && !user_id) {
     toast.success('Successfully add contact!', {
       position: 'top-right',
@@ -191,6 +205,21 @@ const ContactPage: React.FC = () => {
       return;
     }
 
+    const duplicateName = isNameAlreadyExist(
+      firstName,
+      lastName,
+      user_id ? parseInt(user_id) : undefined
+    );
+    if (duplicateName) {
+      toast.error(
+        `Name "${firstName} ${lastName}" already exist! Please choose other unique name`,
+        {
+          position: 'top-right',
+        }
+      );
+      return;
+    }
+
     // Hit graphql query
     const payload = {
       first_name: firstName,
@@ -200,8 +229,6 @@ const ContactPage: React.FC = () => {
 
     // If user id exists, edit id
     if (user_id) {
-      // TODO: Check if name is not unique
-
       editContactMutation({
         variables: {
           id: user_id,
@@ -225,8 +252,6 @@ const ContactPage: React.FC = () => {
             .map((num) => ({ number: num })),
         },
       });
-
-      // TODO: Handle phone not unique
     }
   };
 
@@ -292,7 +317,7 @@ const ContactPage: React.FC = () => {
             }}
             onClick={() => router.push('/')}
           >
-            Cancel
+            Back
           </ActionButton>
           <ActionButton onClick={() => handleSave()}>
             {user_id ? 'Save' : 'Add'}
