@@ -7,6 +7,8 @@ import type { Metadata } from 'next';
 import { loadErrorMessages, loadDevMessages } from '@apollo/client/dev';
 import { ApolloClient, ApolloProvider, InMemoryCache } from '@apollo/client';
 import styled from '@emotion/styled';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 import config from '@/config';
 import { colors } from '@/shared/colors';
@@ -63,6 +65,7 @@ export default function RootLayout({
               <HeadingText>Phonebook</HeadingText>
             </Heading>
             <Container>{children}</Container>
+            <ToastContainer />
           </ContactsProvider>
         </ApolloProvider>
       </body>

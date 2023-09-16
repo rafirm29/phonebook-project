@@ -8,6 +8,7 @@ import { useContacts } from '@/context/ContactProvider';
 import { useQuery } from '@apollo/client';
 import { ContactResult, GET_CONTACT } from '@/services/contacts';
 import { IContact } from '@/shared/interface';
+import { useRouter } from 'next/navigation';
 
 const Section = styled.div({
   fontSize: 24,
@@ -27,16 +28,19 @@ const Empty = styled.div({
 
 const ContactListPage: React.FC = () => {
   const { favoriteContacts } = useContacts();
+  const router = useRouter();
   const { loading, error, data } = useQuery<ContactResult>(GET_CONTACT);
 
   const [favorites, setFavorites] = useState<IContact[]>([]);
 
   useEffect(() => {
+    console.log('favorite change detected');
     const favoriteContact = data?.contact.filter((contact) =>
       favoriteContacts.includes(contact.id)
     );
-    if ((favoriteContact?.length as number) > 0 && favoriteContact)
+    if ((favoriteContact?.length as number) > 0 && favoriteContact) {
       setFavorites([...favoriteContact]);
+    } else setFavorites([]);
   }, [favoriteContacts, data]);
 
   return (

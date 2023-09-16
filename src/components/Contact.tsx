@@ -5,8 +5,10 @@ import React, { useEffect, useState } from 'react';
 import { css, keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
 import Image from 'next/image';
-import { FaHeart, FaCaretDown } from 'react-icons/fa';
+import { FaHeart, FaCaretDown, FaEdit } from 'react-icons/fa';
 import { useContacts } from '@/context/ContactProvider';
+import { colors } from '@/shared/colors';
+import Link from 'next/link';
 
 const ContactContainer = styled.div`
   padding: 16px 0;
@@ -46,22 +48,24 @@ const DropdownArrow = styled.div({
   transition: 'transform 0.3s',
 });
 
-const menuOpen = keyframes`
-0% {
-  opacity: 0;
-  transform: translateY(70px);
-}
-100% {
-  opacity: 1;
-  transform: translateY(0);
-}
-`;
-
 const DropdownContent = styled.div({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   height: 72,
+});
+
+const editBtnStyle = css({
+  cursor: 'pointer',
+  border: `1px solid ${colors.secondary_blue}`,
+  color: colors.secondary_blue,
+  backgroundColor: 'white',
+  height: 40,
+  width: 40,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  borderRadius: '50%',
 });
 
 interface ContactProps {
@@ -79,6 +83,8 @@ export const Contact: React.FC<ContactProps> = ({ contact }) => {
 
     if (currentContact) {
       setIsFavorite(true);
+    } else {
+      setIsFavorite(false);
     }
   }, [favoriteContacts]);
 
@@ -121,7 +127,9 @@ export const Contact: React.FC<ContactProps> = ({ contact }) => {
           animation: 'menuOpen 2s ease-in-out',
         })}
       >
-        Hello
+        <Link href={`/contact?user_id=${contact.id}`} css={editBtnStyle}>
+          <FaEdit css={{ marginLeft: 3 }} />
+        </Link>
       </DropdownContent>
     </>
   );

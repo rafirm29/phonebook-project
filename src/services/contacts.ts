@@ -31,23 +31,29 @@ export const GET_CONTACT = gql`
   }
 `;
 
-export const get_contact_detail_query = (id: number) => {
-  const query = gql`
-  query GetContactDetail($id: Int!){
+export const GET_CONTACT_DETAIL_QUERY = gql`
+  query GetContactDetail($id: Int!) {
     contact_by_pk(id: $id) {
-    last_name
-    id
-    first_name
-    created_at
-    phones {
-      number
+      last_name
+      id
+      first_name
+      created_at
+      phones {
+        number
+      }
     }
   }
-}
-{
-  "id": ${id}
-}
-  `;
+`;
 
-  return query;
-};
+export const MUTATE_EDIT_CONTACT_BY_ID = gql`
+  mutation EditContactById($id: Int!, $_set: contact_set_input) {
+    update_contact_by_pk(pk_columns: { id: $id }, _set: $_set) {
+      id
+      first_name
+      last_name
+      phones {
+        number
+      }
+    }
+  }
+`;
