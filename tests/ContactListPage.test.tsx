@@ -5,7 +5,6 @@ import ContactListPage from '@/app/page';
 import { GET_CONTACT } from '@/services/contacts';
 import ContactsProvider from '@/context/ContactProvider';
 
-// Mock Apollo Client and Context Providers as needed
 const mocks = [
   {
     request: {

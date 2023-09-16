@@ -1,10 +1,9 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { MockedProvider } from '@apollo/client/testing';
-import { useRouter, useSearchParams } from 'next/navigation'; // Replace with your router import
-import ContactPage from '@/app/contact/page'; // Replace with your component import
-import { GET_CONTACT_DETAIL_QUERY } from '@/services/contacts'; // Replace with your GraphQL query imports
-import ContactsProvider from '@/context/ContactProvider'; // Replace with your context import
+import ContactPage from '@/app/contact/page';
+import { GET_CONTACT_DETAIL_QUERY } from '@/services/contacts';
+import ContactsProvider from '@/context/ContactProvider';
 
 jest.mock('next/navigation', () => ({
   ...jest.requireActual('next/navigation'),
