@@ -5,10 +5,13 @@ import React, { useEffect, useState } from 'react';
 import { css, keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
 import Image from 'next/image';
-import { FaHeart, FaCaretDown, FaEdit } from 'react-icons/fa';
+import { FaHeart, FaCaretDown, FaEdit, FaTrash } from 'react-icons/fa';
 import { useContacts } from '@/context/ContactProvider';
 import { colors } from '@/shared/colors';
 import Link from 'next/link';
+import { useMutation } from '@apollo/client';
+import { GET_CONTACT, MUTATE_DELETE_CONTACT } from '@/services/contacts';
+import { toast } from 'react-toastify';
 
 const ContactContainer = styled.div`
   padding: 16px 0;
@@ -25,6 +28,11 @@ const ContactContainer = styled.div`
 const PhoneText = styled.p({
   fontSize: 12,
   color: 'gray',
+});
+
+const ExtraNumber = styled.span({
+  opacity: 0.6,
+  fontSize: 10,
 });
 
 const FavoriteButton = styled.button({
@@ -53,6 +61,7 @@ const DropdownContent = styled.div({
   alignItems: 'center',
   justifyContent: 'center',
   height: 72,
+  gap: 16,
 });
 
 const editBtnStyle = css({
@@ -68,9 +77,54 @@ const editBtnStyle = css({
   borderRadius: '50%',
 });
 
-const ExtraNumber = styled.span({
-  opacity: 0.6,
-  fontSize: 10,
+const DeleteBtn = styled.button({
+  cursor: 'pointer',
+  border: `1px solid ${colors.danger}`,
+  color: colors.danger,
+  backgroundColor: 'white',
+  height: 40,
+  width: 40,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  borderRadius: '50%',
+});
+
+const Modal = styled.div({
+  position: 'fixed',
+  // height: '100vh',
+  width: 250,
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  zIndex: 20,
+  backgroundColor: 'white',
+  padding: 16,
+  borderRadius: 8,
+  boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.5)',
+  touchAction: 'none',
+});
+
+const ModalText = styled.p({
+  textAlign: 'center',
+  width: '100%',
+  fontSize: 16,
+  marginBottom: 8,
+});
+
+const ModalBtn = styled.button({
+  padding: 16,
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  backgroundColor: 'white',
+  color: colors.danger,
+  fontWeight: 'bold',
+  width: '50%',
+  border: `1px solid ${colors.danger}`,
+  outline: 'none',
+  borderRadius: 6,
+  fontSize: 16,
 });
 
 interface ContactProps {
@@ -80,8 +134,30 @@ interface ContactProps {
 export const Contact: React.FC<ContactProps> = ({ contact }) => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const { favoriteContacts, addToFavorites, removeFromFavorites } =
     useContacts();
+
+  const [deleteContact, deleteContactData] = useMutation(MUTATE_DELETE_CONTACT);
+  if (deleteContactData.loading) console.log('Deleting'); // TODO: Implement loading
+  if (deleteContactData.error) console.error(deleteContactData.error);
+  if (deleteContactData.data) {
+    toast.success('Successfully delete contact!', {
+      position: 'top-right',
+    });
+    deleteContactData.data = null;
+  }
+
+  const handleDelete = (id: number) => {
+    deleteContact({
+      variables: {
+        id,
+      },
+      refetchQueries: [{ query: GET_CONTACT }],
+    });
+
+    setIsModalOpen(false);
+  };
 
   useEffect(() => {
     const currentContact = favoriteContacts.find((cid) => cid === contact.id);
@@ -141,7 +217,27 @@ export const Contact: React.FC<ContactProps> = ({ contact }) => {
         <Link href={`/contact?user_id=${contact.id}`} css={editBtnStyle}>
           <FaEdit css={{ marginLeft: 3 }} />
         </Link>
+        <DeleteBtn onClick={() => setIsModalOpen(true)}>
+          <FaTrash />
+        </DeleteBtn>
       </DropdownContent>
+      {isModalOpen && (
+        <Modal>
+          <ModalText>
+            Are you sure you want to delete &quot;{contact.first_name}{' '}
+            {contact.last_name}&quot; from your contact list?
+          </ModalText>
+          <div css={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <ModalBtn onClick={() => setIsModalOpen(false)}>Cancel</ModalBtn>
+            <ModalBtn
+              css={{ backgroundColor: colors.danger, color: 'white' }}
+              onClick={() => handleDelete(contact.id)}
+            >
+              Delete
+            </ModalBtn>
+          </div>
+        </Modal>
+      )}
     </>
   );
 };

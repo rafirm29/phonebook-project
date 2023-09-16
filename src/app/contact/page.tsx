@@ -211,6 +211,8 @@ const ContactPage: React.FC = () => {
           },
         },
       });
+
+      // TODO: Edit number
     }
     // Add new contact alias no user id param
     else {
@@ -223,6 +225,8 @@ const ContactPage: React.FC = () => {
             .map((num) => ({ number: num })),
         },
       });
+
+      // TODO: Handle phone not unique
     }
   };
 

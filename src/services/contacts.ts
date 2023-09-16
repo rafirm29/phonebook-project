@@ -82,3 +82,13 @@ export const MUTATE_ADD_CONTACT = gql`
     }
   }
 `;
+
+export const MUTATE_DELETE_CONTACT = gql`
+  mutation MyMutation($id: Int!) {
+    delete_contact_by_pk(id: $id) {
+      first_name
+      last_name
+      id
+    }
+  }
+`;
