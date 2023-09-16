@@ -16,11 +16,6 @@ import ContactsProvider from '@/context/ContactProvider';
 
 const poppins = Poppins({ weight: '400', subsets: ['latin'] });
 
-export const metadata: Metadata = {
-  title: 'Phonebook Project',
-  description: 'GOTO Phonebook project',
-};
-
 const client = new ApolloClient({
   uri: config.GRAPHQL_URL,
   cache: new InMemoryCache(),
@@ -58,6 +53,14 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <title>Phonebook App Project</title>
+        <meta name="description" content="Mini Phonebook Project"></meta>
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0"
+        ></meta>
+      </head>
       <body className={poppins.className}>
         <ApolloProvider client={client}>
           <ContactsProvider>
