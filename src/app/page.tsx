@@ -12,6 +12,7 @@ import { IContact } from '@/shared/interface';
 import { useRouter } from 'next/navigation';
 import { colors } from '@/shared/colors';
 import { FaPlus } from 'react-icons/fa';
+import SearchBarComponent from '@/components/SearchBar';
 
 const Container = styled.div({
   padding: 16,
@@ -82,7 +83,8 @@ const AddContact = styled.button({
 
 const ContactListPage: React.FC = () => {
   const { favoriteContacts } = useContacts();
-  const { loading, error, data } = useQuery<ContactResult>(GET_CONTACT);
+  const { loading, error, data, refetch } =
+    useQuery<ContactResult>(GET_CONTACT);
 
   const router = useRouter();
 
@@ -126,6 +128,37 @@ const ContactListPage: React.FC = () => {
   const endIdx = startIdx + itemsPerPage;
   const contactsToDisplay = regularContacts.slice(startIdx, endIdx);
 
+  // Search debounce
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const refecthGetContact = () => {
+    refetch({
+      where: {
+        _or: [
+          { first_name: { _like: `%${searchQuery}%` } },
+          { last_name: { _like: `%${searchQuery}%` } },
+        ],
+      },
+    });
+  };
+
+  useEffect(() => {
+    const debounceSearch = setTimeout(() => {
+      refetch({
+        where: {
+          _or: [
+            { first_name: { _ilike: `%${searchQuery}%` } },
+            { last_name: { _ilike: `%${searchQuery}%` } },
+          ],
+        },
+      });
+    }, 500);
+
+    return () => {
+      clearTimeout(debounceSearch);
+    };
+  }, [searchQuery]);
+
   useEffect(() => {
     const favoriteContact = data?.contact.filter((contact) =>
       favoriteContacts.includes(contact.id)
@@ -138,6 +171,10 @@ const ContactListPage: React.FC = () => {
   return (
     <Container>
       {/* TODO: Add section per alphabet */}
+      <SearchBarComponent
+        onChange={(e) => setSearchQuery(e.target.value)}
+        value={searchQuery}
+      />
       <Section>Favorites</Section>
       {loading && <ContactLoading />}
       {!loading && favorites.length === 0 ? (
@@ -145,17 +182,29 @@ const ContactListPage: React.FC = () => {
       ) : (
         <>
           {favorites.map((contact) => (
-            <Contact key={contact.id} contact={contact} />
+            <Contact
+              key={contact.id}
+              contact={contact}
+              onDelete={() => refecthGetContact()}
+            />
           ))}
         </>
       )}
       <Section>Contacts</Section>
       {loading && <ContactLoading />}
-      {data &&
-        !loading &&
+      {data && !loading && contactsToDisplay.length === 0 ? (
+        <Empty>No contact</Empty>
+      ) : (
         contactsToDisplay
           .filter((c) => !favoriteContacts.includes(c.id))
-          .map((contact) => <Contact key={contact.id} contact={contact} />)}
+          .map((contact) => (
+            <Contact
+              key={contact.id}
+              contact={contact}
+              onDelete={() => refecthGetContact()}
+            />
+          ))
+      )}
       {renderPageNumbers()}
       <AddContact onClick={() => router.push('/contact')}>
         <FaPlus />

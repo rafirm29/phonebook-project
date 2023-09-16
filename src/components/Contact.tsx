@@ -2,7 +2,7 @@
 
 import { IContact } from '@/shared/interface';
 import React, { useEffect, useState } from 'react';
-import { css, keyframes } from '@emotion/react';
+import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import Image from 'next/image';
 import { FaHeart, FaCaretDown, FaEdit, FaTrash } from 'react-icons/fa';
@@ -129,9 +129,10 @@ const ModalBtn = styled.button({
 
 interface ContactProps {
   contact: IContact;
+  onDelete: () => void;
 }
 
-export const Contact: React.FC<ContactProps> = ({ contact }) => {
+export const Contact: React.FC<ContactProps> = ({ contact, onDelete }) => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -145,6 +146,7 @@ export const Contact: React.FC<ContactProps> = ({ contact }) => {
     toast.success('Successfully delete contact!', {
       position: 'top-right',
     });
+    onDelete();
     deleteContactData.data = null;
   }
 
