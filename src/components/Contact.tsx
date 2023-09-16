@@ -187,6 +187,7 @@ export const Contact: React.FC<ContactProps> = ({ contact, onDelete }) => {
               ? removeFromFavorites(contact.id)
               : addToFavorites(contact.id)
           }
+          aria-label="Toggle Favorite"
         >
           <FaHeart />
         </FavoriteButton>
