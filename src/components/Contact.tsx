@@ -92,7 +92,6 @@ const DeleteBtn = styled.button({
 
 const Modal = styled.div({
   position: 'fixed',
-  // height: '100vh',
   width: 250,
   top: '50%',
   left: '50%',
@@ -113,6 +112,7 @@ const ModalText = styled.p({
 });
 
 const ModalBtn = styled.button({
+  cursor: 'pointer',
   padding: 16,
   display: 'flex',
   justifyContent: 'center',

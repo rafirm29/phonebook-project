@@ -7,14 +7,16 @@ import styled from '@emotion/styled';
 import { colors } from '@/shared/colors';
 import Image from 'next/image';
 import { css } from '@emotion/react';
-import { FaPhone, FaPlusCircle } from 'react-icons/fa';
+import { FaInfo, FaInfoCircle, FaPhone, FaPlusCircle } from 'react-icons/fa';
 import { isNameValid, isValidPhoneNumber } from '@/utils/validator';
 import { toast } from 'react-toastify';
 import { useQuery, useMutation } from '@apollo/client';
 import {
   GET_CONTACT_DETAIL_QUERY,
   MUTATE_ADD_CONTACT,
+  MUTATE_ADD_NUMBER_TO_CONTACT,
   MUTATE_EDIT_CONTACT_BY_ID,
+  MUTATE_EDIT_PHONE_NUMBER,
 } from '@/services/contacts';
 import { useContacts } from '@/context/ContactProvider';
 
@@ -48,6 +50,9 @@ const Label = styled.label({
   fontSize: 12,
   color: 'grey',
   transition: 'all 0.3 ease',
+  display: 'flex',
+  alignItems: 'center',
+  gap: 8,
 });
 
 const InputText = styled.input({
@@ -109,6 +114,36 @@ const ActionButton = styled.button({
   fontSize: 16,
 });
 
+const Modal = styled.div({
+  position: 'fixed',
+  width: 250,
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  zIndex: 20,
+  backgroundColor: 'white',
+  padding: 16,
+  borderRadius: 8,
+  boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.5)',
+  touchAction: 'none',
+});
+
+const ModalBtn = styled.button({
+  cursor: 'pointer',
+  padding: 16,
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  backgroundColor: 'white',
+  color: colors.secondary_blue,
+  fontWeight: 'bold',
+  width: '100%',
+  border: `1px solid ${colors.secondary_blue}`,
+  outline: 'none',
+  borderRadius: 6,
+  fontSize: 16,
+});
+
 const ContactPage: React.FC = () => {
   const searchParams = useSearchParams();
   const user_id = searchParams.get('user_id');
@@ -118,6 +153,8 @@ const ContactPage: React.FC = () => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [phones, setPhones] = useState(['']);
+  const [developerNotesOpen, setDeveloperNotesOpen] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
   const { data, loading, error } = useQuery(GET_CONTACT_DETAIL_QUERY, {
     variables: { id: user_id },
@@ -129,11 +166,25 @@ const ContactPage: React.FC = () => {
   );
   if (editContactData.loading) console.log('Submitting'); // TODO: Implement loading
   if (editContactData.error) console.error(editContactData.error);
-  if (editContactData.data) {
+
+  // Edit number mutation
+  const [editNumberMutation, editNumberData] = useMutation(
+    MUTATE_EDIT_PHONE_NUMBER
+  );
+  const [addNumberMutation, addNumberData] = useMutation(
+    MUTATE_ADD_NUMBER_TO_CONTACT
+  );
+  if (editNumberData.loading) console.log('Submitting number'); // TODO: Implement loading
+  if (editNumberData.data && editContactData.data && submitted) {
     toast.success('Successfully update contact!', {
       position: 'top-right',
     });
+    editNumberData.data = null;
     editContactData.data = null;
+    setSubmitted(false);
+  }
+  if (addNumberData.data) {
+    addNumberData.data = null;
   }
 
   // Add contact mutation
@@ -239,7 +290,38 @@ const ContactPage: React.FC = () => {
         },
       });
 
-      // TODO: Edit number
+      // Edit number and add new ones
+      const existingPhones: Array<{ number: string }> =
+        data.contact_by_pk.phones;
+      const existingPhonesMaxIdx = existingPhones.length - 1;
+      phones.forEach((newNumber, idx) => {
+        if (newNumber !== '') {
+          // While edit
+          if (idx <= existingPhonesMaxIdx) {
+            console.log(existingPhones[idx].number);
+            console.log(newNumber);
+            editNumberMutation({
+              variables: {
+                pk_columns: {
+                  number: existingPhones[idx].number,
+                  contact_id: user_id,
+                },
+                new_phone_number: newNumber,
+              },
+            });
+          } else {
+            // New numbers
+            addNumberMutation({
+              variables: {
+                contact_id: user_id,
+                phone_number: newNumber,
+              },
+            });
+          }
+        }
+      });
+
+      setSubmitted(true);
     }
     // Add new contact alias no user id param
     else {
@@ -294,8 +376,14 @@ const ContactPage: React.FC = () => {
           value={lastName}
           onChange={(e) => setLastName(e.target.value)}
         />
-        <Label>Phone Number(s)</Label>
-        {phones.map((phone, idx) => (
+        <Label>
+          Phone Number(s){' '}
+          <FaInfoCircle
+            css={{ cursor: 'pointer', color: colors.secondary_blue }}
+            onClick={() => setDeveloperNotesOpen(true)}
+          />
+        </Label>
+        {phones.map((_, idx) => (
           <PhoneContainer key={idx}>
             <FaPhone />
             <InputText
@@ -324,6 +412,23 @@ const ContactPage: React.FC = () => {
           </ActionButton>
         </ActionContainer>
       </ContactForm>
+      {developerNotesOpen && (
+        <Modal>
+          <p css={{ textAlign: 'justify', fontSize: 12 }}>
+            This is a note from developer. The phone numbers GQL mutation (edit
+            and delete) may cause inconsistency on phone numbers order, thus it
+            may feels like the numbers are shuffling after saving/update
+            contact. Developer has verified it through various experiment on the
+            GQL playground, so please do understand this user experience
+            behaviour 🙏
+          </p>
+          <div css={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <ModalBtn onClick={() => setDeveloperNotesOpen(false)}>
+              Cancel
+            </ModalBtn>
+          </div>
+        </Modal>
+      )}
     </>
   );
 };
