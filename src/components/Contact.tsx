@@ -68,6 +68,11 @@ const editBtnStyle = css({
   borderRadius: '50%',
 });
 
+const ExtraNumber = styled.span({
+  opacity: 0.6,
+  fontSize: 10,
+});
+
 interface ContactProps {
   contact: IContact;
 }
@@ -107,12 +112,18 @@ export const Contact: React.FC<ContactProps> = ({ contact }) => {
         >
           <FaHeart />
         </FavoriteButton>
-        <Image src={'/img/avatar.png'} alt="Avatar" height={40} width={40} />
+        <Image src={'/img/avatar-2.png'} alt="Avatar" height={40} width={40} />
         <div>
           <p>
             {contact.first_name} {contact.last_name}
           </p>
-          <PhoneText>{contact.phones[0].number}</PhoneText>
+          <PhoneText>
+            {contact.phones[0].number}{' '}
+            <ExtraNumber>
+              {contact.phones.length > 1 &&
+                `+${contact.phones.length - 1} other number(s)`}
+            </ExtraNumber>
+          </PhoneText>
         </div>
         <DropdownArrow
           css={{ transform: `${isOpen ? 'rotate(180deg)' : 'rotate(0)'}` }}

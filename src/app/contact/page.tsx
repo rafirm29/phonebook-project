@@ -10,10 +10,10 @@ import { css } from '@emotion/react';
 import { FaPhone, FaPlusCircle } from 'react-icons/fa';
 import { isNameValid, isValidPhoneNumber } from '@/utils/validator';
 import { toast } from 'react-toastify';
-import { useQuery, useMutation, useLazyQuery } from '@apollo/client';
+import { useQuery, useMutation } from '@apollo/client';
 import {
-  GET_CONTACT,
   GET_CONTACT_DETAIL_QUERY,
+  MUTATE_ADD_CONTACT,
   MUTATE_EDIT_CONTACT_BY_ID,
 } from '@/services/contacts';
 
@@ -124,13 +124,28 @@ const ContactPage: React.FC = () => {
   const [editContactMutation, editContactData] = useMutation(
     MUTATE_EDIT_CONTACT_BY_ID
   );
-  if (editContactData.loading) console.log('Submitting');
-  if (editContactData.error) console.log('Error');
+  if (editContactData.loading) console.log('Submitting'); // TODO: Implement loading
+  if (editContactData.error) console.error(editContactData.error);
   if (editContactData.data) {
     toast.success('Successfully update contact!', {
       position: 'top-right',
     });
     editContactData.data = null;
+  }
+
+  // Add contact mutation
+  const [addContactMutation, addContactData] = useMutation(MUTATE_ADD_CONTACT);
+  if (addContactData.loading) console.log('Adding'); // TODO: Implement loading
+  if (addContactData.error) console.error(addContactData.error);
+  if (addContactData.data && !user_id) {
+    toast.success('Successfully add contact!', {
+      position: 'top-right',
+    });
+    const newContactId = addContactData.data.insert_contact.returning[0].id;
+    addContactData.data = null;
+    setTimeout(() => {
+      router.push(`/contact?user_id=${newContactId}`);
+    }, 1000);
   }
 
   const handlePhoneInput = (idx: number, value: string) => {
@@ -191,9 +206,21 @@ const ContactPage: React.FC = () => {
         variables: {
           id: user_id,
           _set: {
-            first_name: firstName,
-            last_name: lastName,
+            first_name: payload.first_name,
+            last_name: payload.last_name,
           },
+        },
+      });
+    }
+    // Add new contact alias no user id param
+    else {
+      addContactMutation({
+        variables: {
+          first_name: payload.first_name,
+          last_name: payload.last_name,
+          phones: phones
+            .filter((num) => num != '')
+            .map((num) => ({ number: num })),
         },
       });
     }
@@ -259,11 +286,13 @@ const ContactPage: React.FC = () => {
               border: `1px solid ${colors.primary_green}`,
               backgroundColor: 'white',
             }}
-            onClick={() => router.back()}
+            onClick={() => router.push('/')}
           >
             Cancel
           </ActionButton>
-          <ActionButton onClick={() => handleSave()}>Save</ActionButton>
+          <ActionButton onClick={() => handleSave()}>
+            {user_id ? 'Save' : 'Add'}
+          </ActionButton>
         </ActionContainer>
       </ContactForm>
     </>

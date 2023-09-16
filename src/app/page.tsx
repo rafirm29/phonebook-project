@@ -11,6 +11,11 @@ import { ContactResult, GET_CONTACT } from '@/services/contacts';
 import { IContact } from '@/shared/interface';
 import { useRouter } from 'next/navigation';
 import { colors } from '@/shared/colors';
+import { FaPlus } from 'react-icons/fa';
+
+const Container = styled.div({
+  padding: 16,
+});
 
 const Section = styled.div({
   fontSize: 24,
@@ -37,6 +42,7 @@ const Pagination = styled.div({
 });
 
 const Page = styled.button({
+  cursor: 'pointer',
   outline: 'none',
   border: 'none',
   display: 'flex',
@@ -51,9 +57,34 @@ const Page = styled.button({
   width: 30,
 });
 
+const AddContact = styled.button({
+  cursor: 'pointer',
+  width: 'calc(100% - 16px)',
+  margin: 8,
+  outline: 'none',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  padding: '12px 8px',
+  fontWeight: 'bold',
+  fontSize: 16,
+  gap: 8,
+  color: colors.secondary_blue,
+  border: `1px solid ${colors.secondary_blue}`,
+  borderRadius: 6,
+  backgroundColor: 'white',
+  transition: 'all 0.3s ease',
+  ':hover': {
+    color: 'white',
+    backgroundColor: colors.secondary_blue,
+  },
+});
+
 const ContactListPage: React.FC = () => {
   const { favoriteContacts } = useContacts();
   const { loading, error, data } = useQuery<ContactResult>(GET_CONTACT);
+
+  const router = useRouter();
 
   const [favorites, setFavorites] = useState<IContact[]>([]);
 
@@ -96,7 +127,6 @@ const ContactListPage: React.FC = () => {
   const contactsToDisplay = regularContacts.slice(startIdx, endIdx);
 
   useEffect(() => {
-    console.log('favorite change detected');
     const favoriteContact = data?.contact.filter((contact) =>
       favoriteContacts.includes(contact.id)
     );
@@ -106,7 +136,8 @@ const ContactListPage: React.FC = () => {
   }, [favoriteContacts, data]);
 
   return (
-    <>
+    <Container>
+      {/* TODO: Add section per alphabet */}
       <Section>Favorites</Section>
       {loading && <ContactLoading />}
       {!loading && favorites.length === 0 ? (
@@ -126,7 +157,11 @@ const ContactListPage: React.FC = () => {
           .filter((c) => !favoriteContacts.includes(c.id))
           .map((contact) => <Contact key={contact.id} contact={contact} />)}
       {renderPageNumbers()}
-    </>
+      <AddContact onClick={() => router.push('/contact')}>
+        <FaPlus />
+        Add Contact
+      </AddContact>
+    </Container>
   );
 };
 
