@@ -21,9 +21,14 @@ This project uses Next js version 13 for it's main frontend framework template. 
 3. Pagination are **implemented locally** due to the use case of having the need to **show 10 regular contacts** after the favorite contact session, and not have the favorite contacts exist in the regular contacts (no duplicates)
 4. The search functionality implements **debounce** to make sure it won't overload the API with too frequent request due to updates in typing. The debounce time is set to 0.5 second
 5. The contact detail page provide direct option whether user wants to edit right away or just leave the data as it is
+6. Automated tests using GitHub CI pipeline (examples can be found on Pull Request Tab. The success and failed examples are provided)
 
 ## Developer notes
 
 On the contact form page, whenever we want to add or edit more than 1 number, it usually reshuffles the order. Developer has verified that it is due to the behaviour on the GQL API (shuffling order after edit number). Thus, the developer considered to leave it be as it takes bigger effort to handle it on the frontend and could have bigger impact on client side performance
 
 ## Screenshots
+
+![Contact list page](./screenshot/page-1.jpg)
+![Contact form page](./screenshot/page-2.jpg)
+![Lighthouse score](./screenshot/lighthouse.jpg)
