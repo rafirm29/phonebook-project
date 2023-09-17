@@ -1,34 +1,29 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+## Phonebook Project
 
-## Getting Started
+by Rafi Raihansyah Munandar
+email: rafiraihansyahm@gmail.com
+Deployed app link: https://phonebook-project-liard.vercel.app/
 
-First, run the development server:
+## Overview
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-```
+A phonebook project which implements a _mobile first_ approach in design and development. thus, for best experience, open it in **mobile-view mode**
+This project uses Next js version 13 for it's main frontend framework template. Tech stacks implemented in this project includes:
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+1. Apollo Client (GraphQL)
+2. Emotion (CSS in js)
+3. Jest & React testing library
+4. react-toastify, react-icons, and react-loading-skeleton
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Key features, rationalizations, and assumptions
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+1. All data is **fetched and updated through the graphql** endpoint provided on the test. It is loaded using .env to ensure best practices
+2. Favorite contact data is stored through **Web Storage API**, mainly using local storage, so it persists on page reload
+3. Pagination are **implemented locally** due to the use case of having the need to **show 10 regular contacts** after the favorite contact session, and not have the favorite contacts exist in the regular contacts (no duplicates)
+4. The search functionality implements **debounce** to make sure it won't overload the API with too frequent request due to updates in typing. The debounce time is set to 0.5 second
+5. The contact detail page provide direct option whether user wants to edit right away or just leave the data as it is
 
-## Learn More
+## Developer notes
 
-To learn more about Next.js, take a look at the following resources:
+On the contact form page, whenever we want to add or edit more than 1 number, it usually reshuffles the order. Developer has verified that it is due to the behaviour on the GQL API (shuffling order after edit number). Thus, the developer considered to leave it be as it takes bigger effort to handle it on the frontend and could have bigger impact on client side performance
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+## Screenshots
