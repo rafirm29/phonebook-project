@@ -364,7 +364,7 @@ const ContactPage: React.FC = () => {
         {data && data.contact_by_pk && (
           <UserId>User ID: {data.contact_by_pk.id}</UserId>
         )}
-        <Label>First Name</Label>
+        {/* <Label>First Name</Label>
         <InputText
           placeholder="First Name"
           value={firstName}
@@ -375,7 +375,7 @@ const ContactPage: React.FC = () => {
           placeholder="Last Name"
           value={lastName}
           onChange={(e) => setLastName(e.target.value)}
-        />
+        /> */}
         <Label>
           Phone Number(s){' '}
           <FaInfoCircle
