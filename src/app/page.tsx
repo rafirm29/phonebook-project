@@ -172,6 +172,10 @@ const ContactListPage: React.FC = () => {
     } else setFavorites([]);
   }, [favoriteContacts, data]);
 
+  useEffect(() => {
+    refetch();
+  }, []);
+
   return (
     <Container>
       {/* TODO: Add section per alphabet */}

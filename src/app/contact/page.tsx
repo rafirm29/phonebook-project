@@ -7,7 +7,13 @@ import styled from '@emotion/styled';
 import { colors } from '@/shared/colors';
 import Image from 'next/image';
 import { css } from '@emotion/react';
-import { FaInfo, FaInfoCircle, FaPhone, FaPlusCircle } from 'react-icons/fa';
+import {
+  FaHeart,
+  FaInfo,
+  FaInfoCircle,
+  FaPhone,
+  FaPlusCircle,
+} from 'react-icons/fa';
 import { isNameValid, isValidPhoneNumber } from '@/utils/validator';
 import { toast } from 'react-toastify';
 import { useQuery, useMutation } from '@apollo/client';
@@ -44,6 +50,22 @@ const UserId = styled.p({
   marginBottom: 4,
   fontWeight: 'bold',
   textAlign: 'center',
+  position: 'relative',
+});
+
+const FavoriteButton = styled.button({
+  padding: 8,
+  marginTop: 16,
+  position: 'absolute',
+  right: 16,
+  top: '100%',
+  backgroundColor: 'transparent',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  outline: 'none',
+  border: 'none',
+  cursor: 'pointer',
 });
 
 const Label = styled.label({
@@ -148,7 +170,13 @@ const ContactPage: React.FC = () => {
   const searchParams = useSearchParams();
   const user_id = searchParams.get('user_id');
   const router = useRouter();
-  const { isNameAlreadyExist } = useContacts();
+  const {
+    isNameAlreadyExist,
+    addToFavorites,
+    removeFromFavorites,
+    favoriteContacts,
+  } = useContacts();
+  const [isFavorite, setIsFavorite] = useState(false);
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -159,6 +187,21 @@ const ContactPage: React.FC = () => {
   const { data, loading, error } = useQuery(GET_CONTACT_DETAIL_QUERY, {
     variables: { id: user_id },
   });
+
+  // Check favorite
+  useEffect(() => {
+    if (user_id) {
+      const currentContact = favoriteContacts.find(
+        (cid) => cid === parseInt(user_id)
+      );
+
+      if (currentContact) {
+        setIsFavorite(true);
+      } else {
+        setIsFavorite(false);
+      }
+    }
+  }, [favoriteContacts]);
 
   // Edit contact mutation
   const [editContactMutation, editContactData] = useMutation(
@@ -359,6 +402,19 @@ const ContactPage: React.FC = () => {
           height={150}
           width={150}
         />
+        {user_id && (
+          <FavoriteButton
+            onClick={() =>
+              isFavorite
+                ? removeFromFavorites(parseInt(user_id))
+                : addToFavorites(parseInt(user_id))
+            }
+          >
+            <FaHeart
+              css={{ fontSize: 24, color: `${isFavorite ? 'red' : 'dimgray'}` }}
+            />
+          </FavoriteButton>
+        )}
       </ContactHeader>
       <ContactForm>
         {data && data.contact_by_pk && (
@@ -375,6 +431,11 @@ const ContactPage: React.FC = () => {
           placeholder="Last Name"
           value={lastName}
           onChange={(e) => setLastName(e.target.value)}
+        />
+        {/* Adds another input text without changing others */}
+        <InputText
+          placeholder="New Input"
+          onChange={(e) => console.log(e.target.value)}
         />
         <Label>
           Phone Number(s){' '}
