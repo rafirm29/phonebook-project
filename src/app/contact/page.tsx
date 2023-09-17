@@ -376,6 +376,11 @@ const ContactPage: React.FC = () => {
           value={lastName}
           onChange={(e) => setLastName(e.target.value)}
         />
+        {/* Adds another input text without changing others */}
+        <InputText
+          placeholder="New Input"
+          onChange={(e) => console.log(e.target.value)}
+        />
         <Label>
           Phone Number(s){' '}
           <FaInfoCircle
